@@ -2,7 +2,7 @@
 import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
-import { userService } from "@/services/userServies";
+import { userService } from "@/services/userService";
 export default function Singup() { 
 interface FormData {   
     name: string;

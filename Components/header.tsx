@@ -14,7 +14,7 @@ export default function Header() {
     <header className="site-header">
       <div className="container">
         <Link href="/" className="logo">
-          SplitIt {isOpen}
+          Split Bill {isOpen}
         </Link>
 
         <button onClick={() => setIsOpen(!isOpen)}

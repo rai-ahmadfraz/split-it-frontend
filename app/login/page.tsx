@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { userService } from "@/services/userServies";
+import { userService } from "@/services/userService";
+import { useUserStore } from "@/store/userStore";
+import { useRedirectIfLoggedIn } from "@/hooks/authHooks";
 
 interface FormData {   
     email: string;
@@ -9,8 +11,11 @@ interface FormData {
 }
 
 export default function Login() {  
+  
 
-
+    const { user,setUser } = useUserStore();
+    useRedirectIfLoggedIn('/home');
+     
     const [formData, setFormData] = useState<FormData>({
         email: '',
         password: '',   
@@ -23,12 +28,16 @@ export default function Login() {
 
     const loginUser = async (e: React.FormEvent) => {
         e.preventDefault();
-        const response = await userService.login(formData);
-        console.log('Form submitted:', response);   
+       const responseUser =  await userService.login(formData);
+       if(responseUser && responseUser.id){
+        setUser({id:responseUser.id,name:responseUser.name,email:responseUser.emial,token:responseUser.access_token})
+        localStorage.setItem('access_token',responseUser.access_token);
+       }
     }
     return <div className="login-page">
       <div className="login-card">
         <h1>Create Account</h1>
+        <p>{user?.name}</p>
         <p>Login SplitIt and start managing your expenses easily.</p>
 
         <form className="login-form" onSubmit={loginUser}>
