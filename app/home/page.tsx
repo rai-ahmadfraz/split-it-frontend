@@ -3,10 +3,12 @@ import React from 'react';
 import { useRequireAuth } from '@/hooks/authHooks';
 import { userService } from '@/services/userService';
 import { useState,useEffect } from 'react';
-
+import { useUserStore } from '@/store/userStore';
+import { Capitalize } from '@/lib/commonFilter';
 interface UserBalance {
   userId: number;
   userName: string;
+  userEmail: string;
   balance: number;
   status: string;
 }
@@ -55,6 +57,7 @@ interface Expense {
 const MobileExpenseTracker: React.FC = () => {
 
     useRequireAuth('/login');
+    const {user } = useUserStore();
 
   const [expenseSummary, setexpenseSummary] = useState<ExpenseTrackerData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,12 +110,14 @@ const MobileExpenseTracker: React.FC = () => {
       {
         userId: 2,
         userName: "Fraz",
+        userEmail:'apple@gmail.com',
         balance: -1026.67,
         status: "you owe"
       },
       {
         userId: 3,
         userName: "ahmad",
+        userEmail:'bb@gmail.com',
         balance: 240,
         status: "owes you"
       }
@@ -214,6 +219,9 @@ const MobileExpenseTracker: React.FC = () => {
               }}
             >
               <div className="card-body py-3">
+                <h5 className="mb-3 text-center" style={{ fontWeight: 500 }}>
+                    👋 Welcome back, <span style={{ fontWeight: 700 }}>{Capitalize(user?.name)}</span>
+                </h5>
                 <h2 className="h5 card-title mb-2">Overall Balance</h2>
                 <div className="h2 fw-bold mb-1">
                   {Number(expenseSummary?.summary.netBalance) < 0 ? '-' : ''}{formatCurrency(Number(expenseSummary?.summary.netBalance))}
@@ -251,7 +259,7 @@ const MobileExpenseTracker: React.FC = () => {
                         </div>
                         <div className="flex-grow-1 ms-3">
                         <h5 className="card-title h6 mb-0">{user.userName}</h5>
-                        <p className="text-muted small mb-0">User ID: {user.userId}</p>
+                        <p className="text-muted small mb-0">{user.userEmail}</p>
                         </div>
                         <div className="flex-shrink-0">
                         <span 

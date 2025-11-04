@@ -13,7 +13,7 @@ interface FormData {
 export default function Login() {  
   
 
-    const { user,setUser } = useUserStore();
+    const {setUser } = useUserStore();
     useRedirectIfLoggedIn('/home');
      
     const [formData, setFormData] = useState<FormData>({
@@ -37,7 +37,6 @@ export default function Login() {
     return <div className="login-page">
       <div className="login-card">
         <h1>Create Account</h1>
-        <p>{user?.name}</p>
         <p>Login SplitIt and start managing your expenses easily.</p>
 
         <form className="login-form" onSubmit={loginUser}>
