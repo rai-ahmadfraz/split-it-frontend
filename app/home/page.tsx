@@ -5,61 +5,15 @@ import { userService } from '@/services/userService';
 import { useState,useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { Capitalize } from '@/lib/commonFilter';
-interface UserBalance {
-  userId: number;
-  userName: string;
-  userEmail: string;
-  balance: number;
-  status: string;
-}
-interface BalanceSummary {
-  netBalance: number;
-  overallStatus: string;
-}
-
-interface ExpenseTrackerData {
-  summary: BalanceSummary;
-  users: UserBalance[];
-}
-
-interface Member {
-  userId: number;
-  name: string;
-  amount: number;
-}
-
-interface PaidBy {
-  userId: number;
-  name: string;
-}
-
-interface Owes {
-  userId: number;
-  name: string;
-  amount: number;
-}
-
-interface Expense {
-  expenseId: number;          // Unique ID of the expense
-  title: string;              // Name/description of the expense
-  totalAmount: number;        // Total amount of the expense
-  paidBy: PaidBy;             // Who paid the expense
-  owes: Owes;                 // Who owes what
-  members: Member[];          // List of members and their share
-  status: string;             // Status like "you owe" or "owes you"
-  createdAt: string;          // ISO date string of creation
-}
-
-
-
+import { ExpenseSummary,Expense } from '@/interfaces/expense';
 
 // Main component
-const MobileExpenseTracker: React.FC = () => {
+const SplitBill: React.FC = () => {
 
     useRequireAuth('/login');
     const {user } = useUserStore();
 
-  const [expenseSummary, setexpenseSummary] = useState<ExpenseTrackerData | null>(null);
+  const [expenseSummary, setexpenseSummary] = useState<ExpenseSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userExpenses, setUserExpenses] = useState<Record<number, Expense[]>>({});
@@ -72,7 +26,7 @@ const MobileExpenseTracker: React.FC = () => {
       return;
     }
 
-    // setLoading(true);
+    setLoading(true);
     try {
       const data: Expense[] = await userService.getExpensesByMemberId(userId);
       setUserExpenses((prev) => ({ ...prev, [userId]: data }));
@@ -80,7 +34,7 @@ const MobileExpenseTracker: React.FC = () => {
     } catch (err) {
       console.error("Failed to fetch expenses:", err);
     } finally {
-    //   setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -88,7 +42,7 @@ const MobileExpenseTracker: React.FC = () => {
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const data: ExpenseTrackerData = await userService.getExpenseSummary();
+        const data: ExpenseSummary = await userService.getExpenseSummary();
         setexpenseSummary(data);
       } catch (err: any) {
         setError(err.message || "Failed to fetch expense summary");
@@ -100,59 +54,7 @@ const MobileExpenseTracker: React.FC = () => {
     fetchSummary();
   }, []);
 
-  // Sample data matching your structure
-  const expenseData: ExpenseTrackerData = {
-    summary: {
-      netBalance: -786.67,
-      overallStatus: "You owe 786.67"
-    },
-    users: [
-      {
-        userId: 2,
-        userName: "Fraz",
-        userEmail:'apple@gmail.com',
-        balance: -1026.67,
-        status: "you owe"
-      },
-      {
-        userId: 3,
-        userName: "ahmad",
-        userEmail:'bb@gmail.com',
-        balance: 240,
-        status: "owes you"
-      }
-    ],
-    // recentExpenses: [
-    //   {
-    //     id: 1,
-    //     description: "Apartment Rent",
-    //     paidBy: "You",
-    //     amount: 1200.00,
-    //     date: "Mar 1, 2023",
-    //     category: "housing",
-    //     notes: "Monthly payment"
-    //   },
-    //   {
-    //     id: 2,
-    //     description: "New TV",
-    //     paidBy: "Fraz",
-    //     amount: 600.00,
-    //     date: "Feb 25, 2023",
-    //     category: "electronics",
-    //     notes: "Living room"
-    //   },
-    //   {
-    //     id: 3,
-    //     description: "Electricity Bill",
-    //     paidBy: "Ahmad",
-    //     amount: 120.00,
-    //     date: "Feb 20, 2023",
-    //     category: "utilities",
-    //     notes: "February"
-    //   }
-    // ]
-  };
-
+  
   // Helper function to format currency
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -161,39 +63,8 @@ const MobileExpenseTracker: React.FC = () => {
     }).format(Math.abs(amount));
   };
 
-  // Helper function to get category icon
-  const getCategoryIcon = (category: string): string => {
-    const iconMap: { [key: string]: string } = {
-      housing: "house-door",
-      electronics: "tv",
-      utilities: "lightning-charge",
-      food: "cup-straw",
-      transportation: "car-front",
-      entertainment: "film"
-    };
-    return iconMap[category] || "receipt";
-  };
-
-  // Helper function to get category color
-  const getCategoryColor = (category: string): string => {
-    const colorMap: { [key: string]: string } = {
-      housing: "primary",
-      electronics: "success",
-      utilities: "warning",
-      food: "danger",
-      transportation: "info",
-      entertainment: "secondary"
-    };
-    return colorMap[category] || "dark";
-  };
-
   return (
-    <div className="mobile-expense-tracker" style={{ position: 'relative', minHeight: '100vh' }}>
-      {/* Main Content Area */}
-      <div className="container-fluid py-3 bg-light" style={{ 
-        minHeight: '100vh', 
-        paddingBottom: '80px', // Space for bottom nav
-      }}>
+      <div className="container-fluid py-3 bg-light" style={{ minHeight: '100vh', paddingBottom: '80px',}}>
         {/* Header */}
         <div className="row mb-4">
           <div className="col-12">
@@ -324,7 +195,7 @@ const MobileExpenseTracker: React.FC = () => {
                                         {exp.title}
                                     </h6>
                                     <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                                        {new Date(exp.createdAt).toLocaleDateString()}
+                                        {/* {new Date(exp.createdAt).toLocaleDateString()} */}
                                     </span>
                                     </div>
 
@@ -377,108 +248,13 @@ const MobileExpenseTracker: React.FC = () => {
                             )}
                         </div>
                     )}
- 
-
                     </div>
                 </div>
                 </div>
             ))}
         </div>
-
-        {/* Recent Expenses - Only show if there's space */}
-        {/* <div className="row">
-          <div className="col-12">
-            <div className="card shadow-sm" style={{ border: 'none', borderRadius: '12px' }}>
-              <div className="card-header bg-white border-0 py-3">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h4 className="h5 mb-0">Recent Expenses</h4>
-                  <a href="#" className="small text-primary">View All</a>
-                </div>
-              </div>
-              <div className="card-body p-0">
-                {expenseData.recentExpenses.map((expense, index) => (
-                  <div 
-                    key={expense.id}
-                    className={index < expenseData.recentExpenses.length - 1 ? 'border-bottom' : ''}
-                  >
-                    <div className="p-3">
-                      <div className="d-flex align-items-start">
-                        <div className="flex-shrink-0">
-                          <div 
-                            className={`bg-${getCategoryColor(expense.category)} bg-opacity-10 text-${getCategoryColor(expense.category)} rounded p-2 me-3`}
-                          >
-                            <i className={`bi bi-${getCategoryIcon(expense.category)}`}></i>
-                          </div>
-                        </div>
-                        <div className="flex-grow-1">
-                          <h6 className="mb-1">{expense.description}</h6>
-                          <p className="small text-muted mb-1">
-                            {expense.notes} • {expense.date}
-                          </p>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <span className="small">Paid by {expense.paidBy}</span>
-                            <span className="fw-bold">{formatCurrency(expense.amount)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div> */}
       </div>
-
-      {/* Fixed Bottom Navigation - Always Visible */}
-      <div 
-        className="mobile-bottom-nav"
-        style={{ 
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: 'white',
-          borderTop: '1px solid #dee2e6',
-          zIndex: 1000,
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingTop: '8px',
-        }}
-      >
-        <div className="container-fluid">
-          <div className="d-flex justify-content-around align-items-center">
-            <button className="btn btn-link text-dark text-decoration-none p-1 d-flex flex-column align-items-center">
-              <i className="bi bi-house fs-5 mb-1"></i>
-              <small style={{ fontSize: '0.7rem' }}>Home</small>
-            </button>
-            <button className="btn btn-link text-dark text-decoration-none p-1 d-flex flex-column align-items-center">
-              <i className="bi bi-receipt fs-5 mb-1"></i>
-              <small style={{ fontSize: '0.7rem' }}>Expenses</small>
-            </button>
-            <button 
-              className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
-              style={{ 
-                width: '56px', 
-                height: '56px',
-                marginTop: '-24px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }}
-            >
-              <i className="bi bi-plus-lg fs-4 text-white"></i>
-            </button>
-            <button className="btn btn-link text-dark text-decoration-none p-1 d-flex flex-column align-items-center">
-              <i className="bi bi-people fs-5 mb-1"></i>
-              <small style={{ fontSize: '0.7rem' }}>Friends</small>
-            </button>
-            <button className="btn btn-link text-dark text-decoration-none p-1 d-flex flex-column align-items-center">
-              <i className="bi bi-person fs-5 mb-1"></i>
-              <small style={{ fontSize: '0.7rem' }}>Profile</small>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 };
 
-export default MobileExpenseTracker;
+export default SplitBill;

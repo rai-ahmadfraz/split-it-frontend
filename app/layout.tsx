@@ -3,8 +3,14 @@
 import './global.css';
 import Script from 'next/script';
 import { ReactNode } from 'react';
+import BottomMenu from '@/Components/BottomMenu';
+import { useUserStore } from '@/store/userStore';
+import { usePathname } from 'next/navigation';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+
+  const {user } = useUserStore();
+   const pathname = usePathname();
   return (
     <html lang="en">
       <head>
@@ -29,9 +35,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
 
-      <body className="bg-light text-dark">
+      <body>
         {/* ✅ Main app container */}
-        <main>{children}</main>
+        <div className="mobile-expense-tracker" style={{ position: 'relative', minHeight: '100vh' }}>
+          <main>{children}</main>
+          <p>{pathname.startsWith('/home')}</p>
+          {pathname.startsWith('/home') &&
+            <BottomMenu></BottomMenu>
+          }
+        </div>
 
         {/* ✅ Load Bootstrap JS (for dropdowns, modals, etc.) */}
         <Script

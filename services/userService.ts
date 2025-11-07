@@ -36,13 +36,16 @@ async login(formdata: { email: string; password: string }) {
     const response = await apiClient.get("/expenses/summary");
     return response.data;
   },
- async getExpensesByMemberId(memberId: number) {
-  const response = await apiClient.get(`/expenses/member/${memberId}`);
-  if(response.data && response.data.expenses){
-    return response.data.expenses;
+  async getExpensesByMemberId(memberId: number) {
+    const response = await apiClient.get(`/expenses/member/${memberId}`);
+    if(response.data && response.data.expenses){
+      return response.data.expenses;
+    }
+  },
+  async searchUsers(term: string) {
+    const response = await apiClient.get(`/users/search/${term}`);
+    if(response.data){
+      return response.data;
+    }
   }
-}
-
-
-
 };
