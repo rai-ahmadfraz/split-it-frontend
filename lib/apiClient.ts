@@ -18,14 +18,42 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Optional: Global 401 handling
+// Response interceptor for global handling
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      useUserStore.getState().logout();
-      window.location.href = "/login";
+  (response) => {
+    // Handle all success responses (2xx)
+    if (response.status === 201) {
+      alert(response.data.message || "Created successfully!");
     }
+    return response;
+  },
+  (error) => {
+    const message = error.response?.data?.message || "Something went wrong";
+
+    switch (error.status) {
+      case 400:
+        alert(message);
+        break;
+      case 401:
+        alert("Unauthorized! Please login again.");
+        useUserStore.getState().logout();
+        break;
+      case 403:
+        alert("Forbidden! You don’t have permission.");
+        break;
+      case 404:
+        alert("Resource not found!");
+        break;
+      case 409:
+        alert("Conflict! Resource already exists.");
+        break;
+      case 500:
+        alert("Server error! Try again later.");
+        break;
+      default:
+        alert(message);
+    }
+
     return Promise.reject(error);
   }
 );

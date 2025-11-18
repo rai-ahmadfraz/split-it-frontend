@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { userService } from '@/services/userService';
 import { User } from '@/interfaces/user';
+import { friendService } from '@/services/friendService';
 
 
 
@@ -15,7 +16,7 @@ const AddFriend: React.FC = () => {
   // Debounced search
   useEffect(() => {
     const searchUsers = async () => {
-      if (searchQuery.trim().length < 2) {
+      if (searchQuery.trim().length < 3) {
         setSearchResults([]);
         return;
       }
@@ -63,6 +64,10 @@ const AddFriend: React.FC = () => {
   const clearMessage = () => {
     setMessage(null);
   };
+
+  const addFriend = async (friendId:number) => {
+    const results = await friendService.addNewFriend(friendId);
+  }
 
   return (
     <div className="container-fluid py-3 bg-light" style={{ minHeight: '100vh', paddingBottom: '80px' }}>
@@ -169,6 +174,7 @@ const AddFriend: React.FC = () => {
                           <small className="text-muted">{user.email}</small>
                         </div>
                       </div>
+                      <button className='btn btn-sm' onClick={() => addFriend(user.id)}>Add</button>
                       {/* <button
                         className={`btn btn-sm ${
                           addingFriend === user.id
@@ -200,7 +206,7 @@ const AddFriend: React.FC = () => {
                 </div>
               </div>
             </div>
-          ) : searchQuery.length >= 2 && !loading ? (
+          ) : searchQuery.length >= 3 && !loading ? (
             <div className="text-center py-4">
               <i className="bi bi-search display-4 text-muted mb-3"></i>
               <p className="text-muted">No users found</p>
@@ -213,7 +219,7 @@ const AddFriend: React.FC = () => {
               <i className="bi bi-person-plus display-4 text-muted mb-3"></i>
               <p className="text-muted">Search for friends to add</p>
               <small className="text-muted">
-                Enter at least 2 characters to start searching
+                Enter at least 3 characters to start searching
               </small>
             </div>
           )}
